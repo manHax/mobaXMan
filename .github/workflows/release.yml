@@ -1,0 +1,46 @@
+name: Release mobaXMan
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger build automatically when a tag like v1.0.1 is pushed
+  workflow_dispatch: # Allow manual trigger from the GitHub Actions tab
+
+permissions:
+  contents: write # Required for electron-builder to upload to GitHub Releases
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        # Run three concurrent jobs on three different operating systems!
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Linux Dependencies (Keytar)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsecret-1-dev
+
+      - name: Install NPM Dependencies
+        run: npm install
+
+      - name: Build React & TypeScript
+        run: npm run build
+
+      - name: Pack & Release to GitHub
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # This command uses electron-builder to compile for the native OS and publish it to the Release
+        run: npm run dist -- --publish always
