@@ -64,6 +64,9 @@ export const Terminal: React.FC<TerminalProps> = ({ sessionId }) => {
 
     term.onData((data) => window.api.ssh.write(sessionId, data));
     term.onResize(({ cols, rows }) => window.api.ssh.resize(sessionId, cols, rows));
+    
+    // Send initial size immediately
+    window.api.ssh.resize(sessionId, term.cols, term.rows);
 
     window.api.ssh.onData((id: string, data: string) => {
       if (id === sessionId) {

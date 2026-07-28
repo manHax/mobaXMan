@@ -10,6 +10,8 @@ export class SSHSession {
   public sessionId: string;
   private logger: SessionLogger | null = null;
   private currentConfig: SessionConfig | null = null;
+  private cols: number = 80;
+  private rows: number = 24;
 
   constructor(sessionId: string, window: BrowserWindow) {
     this.client = new Client();
@@ -32,6 +34,7 @@ export class SSHSession {
             return;
           }
           this.stream = stream;
+          this.stream.setWindow(this.rows, this.cols, 0, 0);
           stream.on('close', () => {
             this.client.end();
             this.window.webContents.send('ssh:close', { sessionId: this.sessionId });
@@ -94,6 +97,8 @@ export class SSHSession {
   }
 
   resize(cols: number, rows: number) {
+    this.cols = cols;
+    this.rows = rows;
     if (this.stream) {
       this.stream.setWindow(rows, cols, 0, 0);
     }
