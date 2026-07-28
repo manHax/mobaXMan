@@ -51,6 +51,7 @@ if ! pgrep -x "gnome-keyring-d" > /dev/null; then
 fi
 
 # Run the extracted AppImage with no-sandbox (required for Electron in WSL)
+export APPDIR=/opt/mobaxman-wsl
 cd /opt/mobaxman-wsl
 ./AppRun --no-sandbox "$@"
 EOF
