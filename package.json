@@ -2,6 +2,7 @@
   "name": "mobaxman",
   "version": "1.0.0",
   "description": "Cross-platform SSH and SFTP Client",
+  "author": "manHax <manhax@example.com>",
   "main": "dist/main/index.js",
   "scripts": {
     "dev": "vite",
