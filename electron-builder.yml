@@ -1,0 +1,19 @@
+appId: com.sshsftpclient.app
+productName: mobaXMan
+directories:
+  output: release/${version}
+files:
+  - dist
+  - package.json
+mac:
+  target: dmg
+win:
+  target: nsis
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+linux:
+  target:
+    - AppImage
+    - deb
+  category: Utility
