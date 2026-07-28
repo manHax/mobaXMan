@@ -99,6 +99,12 @@ curl -sSL https://raw.githubusercontent.com/manHax/mobaXMan/main/install.sh | ba
 irm https://raw.githubusercontent.com/manHax/mobaXMan/main/install.ps1 | iex
 ```
 
+🖥️ **Windows Subsystem for Linux (WSL)**
+*(Bypasses FUSE issues and auto-configures keyring & dbus)*
+```bash
+curl -sSL https://raw.githubusercontent.com/manHax/mobaXMan/main/install-wsl.sh | bash
+```
+
 ## 🔒 Security First
 We take security seriously. **mobaXMan** does NOT sync your servers to any cloud. Everything remains 100% locally on your machine. Passwords and Private Key passphrases are encrypted at rest using your Operating System's native hardware-backed keychain (`keytar`).
 
