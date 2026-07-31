@@ -68,6 +68,54 @@ export const Terminal: React.FC<TerminalProps> = ({ sessionId }) => {
     // Send initial size immediately
     window.api.ssh.resize(sessionId, term.cols, term.rows);
 
+    // MobaXterm style: Copy on select
+    term.onSelectionChange(() => {
+      if (term.hasSelection()) {
+        navigator.clipboard.writeText(term.getSelection());
+      }
+    });
+
+    // Handle right-click to paste
+    const handleContextMenu = async (e: MouseEvent) => {
+      e.preventDefault();
+      if (term.hasSelection()) {
+        term.clearSelection();
+      } else {
+        try {
+          const text = await navigator.clipboard.readText();
+          window.api.ssh.write(sessionId, text);
+        } catch (err) {
+          console.error('Failed to paste from clipboard:', err);
+        }
+      }
+    };
+    terminalRef.current.addEventListener('contextmenu', handleContextMenu);
+
+    // Keyboard shortcuts for Copy (Ctrl+Shift+C / Cmd+C) and Paste (Ctrl+Shift+V / Cmd+V)
+    term.attachCustomKeyEventHandler((e) => {
+      if (e.type === 'keydown') {
+        const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+        
+        // Copy (Ctrl+C if selected, Ctrl+Shift+C, Cmd+C)
+        if (((isMac ? e.metaKey : e.ctrlKey) && e.key.toLowerCase() === 'c' && term.hasSelection()) || 
+            (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'c' && term.hasSelection())) {
+          navigator.clipboard.writeText(term.getSelection());
+          term.clearSelection();
+          return false;
+        }
+        
+        // Paste (Cmd+V on Mac, Ctrl+Shift+V on Windows/Linux)
+        if ((isMac && e.metaKey && e.key.toLowerCase() === 'v') || 
+            (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'v')) {
+          navigator.clipboard.readText().then(text => {
+            window.api.ssh.write(sessionId, text);
+          });
+          return false;
+        }
+      }
+      return true;
+    });
+
     window.api.ssh.onData((id: string, data: string) => {
       if (id === sessionId) {
         let text = data;
@@ -102,6 +150,7 @@ export const Terminal: React.FC<TerminalProps> = ({ sessionId }) => {
     return () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('keydown', handleKeyDown);
+      terminalRef.current?.removeEventListener('contextmenu', handleContextMenu);
       term.dispose();
       window.api.ssh.disconnect(sessionId);
     };
